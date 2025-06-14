@@ -1,49 +1,40 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  Typography,
-  Button,
-  Form,
-  Input,
-  Card,
-  message,
-  Upload,
-  Modal,
-} from "antd";
-import { useCreateQuiz } from "@/api/hooks/useQuizzes";
-import { useAuth } from "@/lib/auth";
-import { InboxOutlined, PlusOutlined } from "@ant-design/icons";
-import { uploadCoverImage } from "@/lib/storage";
-import Image from "next/image";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { Typography, Button, Form, Input, Card, message, Upload, Modal } from "antd"
+import { useCreateQuiz } from "@/api/hooks/useQuizzes"
+import { useAuth } from "@/lib/auth"
+import { InboxOutlined, PlusOutlined } from "@ant-design/icons"
+import { uploadCoverImage } from "@/lib/storage"
+import Image from "next/image"
 
-const { Title } = Typography;
-const { TextArea } = Input;
-const { Dragger } = Upload;
+const { Title } = Typography
+const { TextArea } = Input
+const { Dragger } = Upload
 
 export default function NewQuizPage() {
-  const router = useRouter();
-  const createQuizMutation = useCreateQuiz();
-  const { user } = useAuth();
-  const [form] = Form.useForm();
-  const [coverImage, setCoverImage] = useState<File | null>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [previewVisible, setPreviewVisible] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const router = useRouter()
+  const createQuizMutation = useCreateQuiz()
+  const { user } = useAuth()
+  const [form] = Form.useForm()
+  const [coverImage, setCoverImage] = useState<File | null>(null)
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [previewVisible, setPreviewVisible] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   const handleCreateQuiz = async (values: any) => {
     try {
-      setUploading(true);
-      let coverImageUrl = null;
+      setUploading(true)
+      let coverImageUrl = null
 
       // Upload cover image if selected
       if (coverImage && user) {
-        coverImageUrl = await uploadCoverImage(coverImage, user.id);
+        coverImageUrl = await uploadCoverImage(coverImage, user.id)
         if (!coverImageUrl) {
-          message.error("Failed to upload cover image");
-          setUploading(false);
-          return;
+          message.error("Failed to upload cover image")
+          setUploading(false)
+          return
         }
       }
 
@@ -53,48 +44,54 @@ export default function NewQuizPage() {
         published: false,
         cover_image: coverImageUrl,
         author_id: user?.id || "",
-      });
+      })
 
-      message.success("Quiz created successfully");
-      router.push(`/quizzes/${newQuiz.id}`);
+      message.success("Quiz created successfully")
+      router.push(`/quizzes/${newQuiz.id}`)
     } catch (error) {
-      message.error("Failed to create quiz");
-      setUploading(false);
+      message.error("Failed to create quiz")
+      setUploading(false)
     }
-  };
+  }
 
   const handleImageChange = (info: any) => {
-    setCoverImage(info.file);
+    if (info.file.status === "uploading") {
+      return
+    }
+    if (info.file.status === "done") {
+      // We're not actually uploading here, just storing the file
+      setCoverImage(info.file.originFileObj)
 
-    // Create a preview URL
-    const reader = new FileReader();
-    reader.onload = () => {
-      setPreviewImage(reader.result as string);
-    };
-    reader.readAsDataURL(info.file);
-  };
+      // Create a preview URL
+      const reader = new FileReader()
+      reader.onload = () => {
+        setPreviewImage(reader.result as string)
+      }
+      reader.readAsDataURL(info.file.originFileObj)
+    }
+  }
 
   const uploadProps = {
     name: "file",
     multiple: false,
     accept: "image/*",
     beforeUpload: (file: File) => {
-      const isImage = file.type.startsWith("image/");
+      const isImage = file.type.startsWith("image/")
       if (!isImage) {
-        message.error("You can only upload image files!");
+        message.error("You can only upload image files!")
       }
-      const isLt2M = file.size / 1024 / 1024 < 2;
+      const isLt2M = file.size / 1024 / 1024 < 2
       if (!isLt2M) {
-        message.error("Image must be smaller than 2MB!");
+        message.error("Image must be smaller than 2MB!")
       }
-      return isImage && isLt2M ? false : Upload.LIST_IGNORE;
+      return isImage && isLt2M ? false : Upload.LIST_IGNORE
     },
     customRequest: ({ onSuccess }: any) => {
       setTimeout(() => {
-        onSuccess("ok", null);
-      }, 0);
+        onSuccess("ok", null)
+      }, 0)
     },
-  };
+  }
 
   return (
     <div>
@@ -104,11 +101,7 @@ export default function NewQuizPage() {
 
       <Card>
         <Form form={form} layout="vertical" onFinish={handleCreateQuiz}>
-          <Form.Item
-            label="Title"
-            name="title"
-            rules={[{ required: true, message: "Please enter a title" }]}
-          >
+          <Form.Item label="Title" name="title" rules={[{ required: true, message: "Please enter a title" }]}>
             <Input placeholder="Quiz title" />
           </Form.Item>
 
@@ -123,10 +116,7 @@ export default function NewQuizPage() {
           <Form.Item label="Cover Image">
             {previewImage ? (
               <div className="relative">
-                <div
-                  className="relative w-full h-48 mb-4 cursor-pointer"
-                  onClick={() => setPreviewVisible(true)}
-                >
+                <div className="relative w-full h-48 mb-4 cursor-pointer" onClick={() => setPreviewVisible(true)}>
                   <Image
                     src={previewImage || "/placeholder.svg"}
                     alt="Cover preview"
@@ -137,8 +127,8 @@ export default function NewQuizPage() {
                 <Button
                   icon={<PlusOutlined />}
                   onClick={() => {
-                    setCoverImage(null);
-                    setPreviewImage(null);
+                    setCoverImage(null)
+                    setPreviewImage(null)
                   }}
                 >
                   Change Image
@@ -149,12 +139,9 @@ export default function NewQuizPage() {
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
                 </p>
-                <p className="ant-upload-text">
-                  Click or drag file to this area to upload
-                </p>
+                <p className="ant-upload-text">Click or drag file to this area to upload</p>
                 <p className="ant-upload-hint">
-                  Support for a single image upload. Please upload an image
-                  smaller than 2MB.
+                  Support for a single image upload. Please upload an image smaller than 2MB.
                 </p>
               </Dragger>
             )}
@@ -168,20 +155,9 @@ export default function NewQuizPage() {
         </Form>
       </Card>
 
-      <Modal
-        open={previewVisible}
-        title="Cover Image Preview"
-        footer={null}
-        onCancel={() => setPreviewVisible(false)}
-      >
-        {previewImage && (
-          <img
-            alt="Cover preview"
-            style={{ width: "100%" }}
-            src={previewImage || "/placeholder.svg"}
-          />
-        )}
+      <Modal open={previewVisible} title="Cover Image Preview" footer={null} onCancel={() => setPreviewVisible(false)}>
+        {previewImage && <img alt="Cover preview" style={{ width: "100%" }} src={previewImage || "/placeholder.svg"} />}
       </Modal>
     </div>
-  );
+  )
 }

@@ -5,7 +5,7 @@ import type { Quiz } from "@/lib/types";
 export const getQuizzes = async (
   page = 1,
   pageSize = 9,
-  isPublicRoute = false
+  searchTerm: string
 ): Promise<{ data: Quiz[]; total: number }> => {
   // Calculate the range for pagination
   const from = (page - 1) * pageSize;
@@ -33,6 +33,9 @@ export const getQuizzes = async (
       .select("*")
       .order("created_at", { ascending: false })
       .range(from, to);
+    if (searchTerm) {
+      dataQuery = dataQuery.ilike("title", `%${searchTerm}%`);
+    }
 
     // If it's a public route, only show published quizzes
 

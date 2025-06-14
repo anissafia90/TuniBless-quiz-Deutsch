@@ -1,35 +1,26 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Form, Input, Select, Button, Card, Typography } from "antd"
-import { useForm, Controller } from "react-hook-form"
-import type { Question, QuestionType } from "@/lib/types"
-import SortableOptions from "./SortableOptions"
+import type React from "react";
+import { useState, useEffect } from "react";
+import { Form, Input, Select, Button, Card, Typography, Radio } from "antd";
+import { useForm, Controller } from "react-hook-form";
+import type { Question } from "@/lib/types";
 
-const { Title } = Typography
-const { Option } = Select
-const { TextArea } = Input
+const { Title, Paragraph } = Typography;
+const { Option } = Select;
+const { TextArea } = Input;
 
 interface QuestionFormProps {
-  initialData?: Question
-  onSubmit: (data: any) => void
-  onCancel: () => void
+  initialData?: Question;
+  onSubmit: (data: any) => void;
+  onCancel: () => void;
 }
 
-const QuestionForm: React.FC<QuestionFormProps> = ({ initialData, onSubmit, onCancel }) => {
-  const defaultOptions =
-    initialData?.question_type === "two_choices"
-      ? { a: initialData.options.a || "", b: initialData.options.b || "" }
-      : initialData?.question_type === "four_choices"
-        ? {
-            a: initialData.options.a || "",
-            b: initialData.options.b || "",
-            c: initialData.options.c || "",
-            d: initialData.options.d || "",
-          }
-        : { a: "", b: "", c: "", d: "" }
-
+const QuestionForm: React.FC<QuestionFormProps> = ({
+  initialData,
+  onSubmit,
+  onCancel,
+}) => {
   const {
     control,
     handleSubmit,
@@ -37,174 +28,357 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ initialData, onSubmit, onCa
     setValue,
     formState: { errors },
   } = useForm({
-    defaultValues: initialData || {
-      question_text: "",
-      question_type: "four_choices",
-      options: defaultOptions,
-      correct_answer: "",
+    defaultValues: {
+      question_text: initialData?.question_text || "",
+      question_type: initialData?.question_type || "four_choices",
+      option_a: initialData?.options?.a || "",
+      option_b: initialData?.options?.b || "",
+      option_c: initialData?.options?.c || "",
+      option_d: initialData?.options?.d || "",
+      correct_answer: initialData?.correct_answer || "",
     },
-  })
+  });
 
-  const questionType = watch("question_type")
-  const [correctAnswer, setCorrectAnswer] = useState(initialData?.correct_answer || "")
+  const questionType = watch("question_type");
+  const [correctAnswer, setCorrectAnswer] = useState(
+    initialData?.correct_answer || ""
+  );
 
-  // Set initial correct answer from initialData
   useEffect(() => {
-    if (initialData?.correct_answer) {
-      setCorrectAnswer(initialData.correct_answer)
-    }
-  }, [initialData])
-
-  const handleTypeChange = (type: QuestionType) => {
-    if (type === "two_choices") {
-      // Preserve existing values if possible
-      const currentOptions = watch("options")
-      setValue("options", {
-        a: currentOptions.a || "",
-        b: currentOptions.b || "",
-      })
-
-      if (correctAnswer !== "a" && correctAnswer !== "b") {
-        setCorrectAnswer("")
-        setValue("correct_answer", "")
-      }
-    } else if (type === "four_choices") {
-      // Preserve existing values if possible
-      const currentOptions = watch("options")
-      setValue("options", {
-        a: currentOptions.a || "",
-        b: currentOptions.b || "",
-        c: currentOptions.c || "",
-        d: currentOptions.d || "",
-      })
-    } else if (type === "input") {
-      setValue("options", {})
-      setCorrectAnswer("")
-    }
-  }
-
-  const handleCorrectAnswerChange = (value: string) => {
-    setCorrectAnswer(value)
-    setValue("correct_answer", value)
-  }
+    setValue("correct_answer", correctAnswer);
+  }, [correctAnswer, setValue]);
 
   const handleFormSubmit = (data: any) => {
-    // Ensure correct_answer is set
-    if ((questionType === "two_choices" || questionType === "four_choices") && !data.correct_answer) {
-      data.correct_answer = correctAnswer
+    const options: Record<string, string> = {};
+
+    if (questionType === "two_choices") {
+      options.a = data.option_a;
+      options.b = data.option_b;
+    } else if (questionType === "four_choices") {
+      options.a = data.option_a;
+      options.b = data.option_b;
+      options.c = data.option_c;
+      options.d = data.option_d;
     }
 
-    onSubmit(data)
-  }
+    const formattedData = {
+      question_text: data.question_text,
+      question_type: data.question_type,
+      options: options,
+      correct_answer: data.correct_answer,
+    };
+
+    onSubmit(formattedData);
+  };
 
   return (
-    <Card className="mb-6">
-      <Form layout="vertical" onFinish={handleSubmit(handleFormSubmit)}>
-        <Controller
-          name="question_text"
-          control={control}
-          rules={{ required: "Question text is required" }}
-          render={({ field, fieldState }) => (
-            <Form.Item
-              label="Question Text"
-              validateStatus={fieldState.error ? "error" : ""}
-              help={fieldState.error?.message}
-            >
-              <TextArea {...field} rows={2} placeholder="Enter your question here" />
-            </Form.Item>
-          )}
-        />
+    <Card className="shadow-xl border-0 rounded-3xl overflow-hidden bg-white animate-fade-in-up">
+      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-8 border-b border-gray-100">
+        <Title level={3} className="mb-3 text-gray-800">
+          {initialData ? "✏️ Edit Question" : "➕ Add New Question"}
+        </Title>
+        <Paragraph className="text-gray-600 mb-0 text-lg">
+          Create engaging questions for your quiz
+        </Paragraph>
+      </div>
 
-        <Controller
-          name="question_type"
-          control={control}
-          rules={{ required: "Question type is required" }}
-          render={({ field, fieldState }) => (
-            <Form.Item
-              label="Question Type"
-              validateStatus={fieldState.error ? "error" : ""}
-              help={fieldState.error?.message}
-            >
-              <Select
-                {...field}
-                placeholder="Select question type"
-                onChange={(value) => {
-                  field.onChange(value)
-                  handleTypeChange(value as QuestionType)
-                }}
-              >
-                <Option value="two_choices">Two Choices</Option>
-                <Option value="four_choices">Four Choices</Option>
-                <Option value="input">Text Input</Option>
-              </Select>
-            </Form.Item>
-          )}
-        />
-
-        {questionType === "two_choices" && (
-          <>
-            <Title level={5}>Options (Drag to reorder)</Title>
+      <div className="p-8">
+        <Form layout="vertical" onFinish={handleSubmit(handleFormSubmit)}>
+          <div className="space-y-8">
+            {/* Question Text */}
             <Controller
-              name="correct_answer"
+              name="question_text"
               control={control}
-              defaultValue={correctAnswer}
-              render={({ field }) => <input type="hidden" {...field} />}
+              rules={{ required: "Question text is required" }}
+              render={({ field, fieldState }) => (
+                <Form.Item
+                  label={
+                    <span className="text-gray-700 font-semibold text-lg">
+                      📝 Question Text
+                    </span>
+                  }
+                  validateStatus={fieldState.error ? "error" : ""}
+                  help={fieldState.error?.message}
+                >
+                  <TextArea
+                    {...field}
+                    rows={3}
+                    placeholder="Enter your question here..."
+                    className="text-lg border-2 border-gray-200 rounded-2xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300 shadow-sm focus:shadow-lg"
+                  />
+                </Form.Item>
+              )}
             />
-            <SortableOptions
-              options={watch("options")}
-              control={control}
-              correctAnswer={correctAnswer}
-              onCorrectAnswerChange={handleCorrectAnswerChange}
-              questionType="two_choices"
-            />
-          </>
-        )}
 
-        {questionType === "four_choices" && (
-          <>
-            <Title level={5}>Options (Drag to reorder)</Title>
+            {/* Question Type */}
             <Controller
-              name="correct_answer"
+              name="question_type"
               control={control}
-              defaultValue={correctAnswer}
-              render={({ field }) => <input type="hidden" {...field} />}
+              rules={{ required: "Question type is required" }}
+              render={({ field, fieldState }) => (
+                <Form.Item
+                  label={
+                    <span className="text-gray-700 font-semibold text-lg">
+                      🎯 Question Type
+                    </span>
+                  }
+                  validateStatus={fieldState.error ? "error" : ""}
+                  help={fieldState.error?.message}
+                >
+                  <Select
+                    {...field}
+                    placeholder="Select question type"
+                    size="large"
+                    className="rounded-2xl"
+                    onChange={(value) => {
+                      field.onChange(value);
+                      setCorrectAnswer("");
+                    }}
+                  >
+                    <Option value="two_choices">
+                      <div className="flex items-center space-x-3 py-2">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <span className="font-medium">
+                          Two Choices (Binary Choice)
+                        </span>
+                      </div>
+                    </Option>
+                    <Option value="four_choices">
+                      <div className="flex items-center space-x-3 py-2">
+                        <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                        <span className="font-medium">
+                          Four Choices (Multiple Choice)
+                        </span>
+                      </div>
+                    </Option>
+                    <Option value="input">
+                      <div className="flex items-center space-x-3 py-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span className="font-medium">Text Input</span>
+                      </div>
+                    </Option>
+                  </Select>
+                </Form.Item>
+              )}
             />
-            <SortableOptions
-              options={watch("options")}
-              control={control}
-              correctAnswer={correctAnswer}
-              onCorrectAnswerChange={handleCorrectAnswerChange}
-              questionType="four_choices"
-            />
-          </>
-        )}
 
-        {questionType === "input" && (
-          <Controller
-            name="correct_answer"
-            control={control}
-            rules={{ required: "Correct answer is required" }}
-            render={({ field, fieldState }) => (
-              <Form.Item
-                label="Correct Answer"
-                validateStatus={fieldState.error ? "error" : ""}
-                help={fieldState.error?.message}
-              >
-                <Input {...field} placeholder="Enter the correct answer" />
-              </Form.Item>
+            {/* Answer Options */}
+            {(questionType === "two_choices" ||
+              questionType === "four_choices") && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <Title level={4} className="mb-0 text-gray-700">
+                    🎨 Answer Options
+                  </Title>
+                  <Paragraph className="text-sm text-gray-500 mb-0">
+                    Select the correct answer below
+                  </Paragraph>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Option A */}
+                  <Controller
+                    name="option_a"
+                    control={control}
+                    rules={{ required: "Option A is required" }}
+                    render={({ field, fieldState }) => (
+                      <Form.Item
+                        validateStatus={fieldState.error ? "error" : ""}
+                        help={fieldState.error?.message}
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-3">
+                            <Radio
+                              checked={correctAnswer === "a"}
+                              onChange={() => setCorrectAnswer("a")}
+                              className="text-lg"
+                            />
+                            <span className="font-semibold text-gray-700">
+                              Option A
+                            </span>
+                          </div>
+                          <Input
+                            {...field}
+                            placeholder="Enter option A"
+                            size="large"
+                            className="border-2 border-gray-200 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300"
+                          />
+                        </div>
+                      </Form.Item>
+                    )}
+                  />
+
+                  {/* Option B */}
+                  <Controller
+                    name="option_b"
+                    control={control}
+                    rules={{ required: "Option B is required" }}
+                    render={({ field, fieldState }) => (
+                      <Form.Item
+                        validateStatus={fieldState.error ? "error" : ""}
+                        help={fieldState.error?.message}
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-3">
+                            <Radio
+                              checked={correctAnswer === "b"}
+                              onChange={() => setCorrectAnswer("b")}
+                              className="text-lg"
+                            />
+                            <span className="font-semibold text-gray-700">
+                              Option B
+                            </span>
+                          </div>
+                          <Input
+                            {...field}
+                            placeholder="Enter option B"
+                            size="large"
+                            className="border-2 border-gray-200 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300"
+                          />
+                        </div>
+                      </Form.Item>
+                    )}
+                  />
+
+                  {/* Option C - Only for four choices */}
+                  {questionType === "four_choices" && (
+                    <Controller
+                      name="option_c"
+                      control={control}
+                      rules={{ required: "Option C is required" }}
+                      render={({ field, fieldState }) => (
+                        <Form.Item
+                          validateStatus={fieldState.error ? "error" : ""}
+                          help={fieldState.error?.message}
+                        >
+                          <div className="space-y-3">
+                            <div className="flex items-center space-x-3">
+                              <Radio
+                                checked={correctAnswer === "c"}
+                                onChange={() => setCorrectAnswer("c")}
+                                className="text-lg"
+                              />
+                              <span className="font-semibold text-gray-700">
+                                Option C
+                              </span>
+                            </div>
+                            <Input
+                              {...field}
+                              placeholder="Enter option C"
+                              size="large"
+                              className="border-2 border-gray-200 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300"
+                            />
+                          </div>
+                        </Form.Item>
+                      )}
+                    />
+                  )}
+
+                  {/* Option D - Only for four choices */}
+                  {questionType === "four_choices" && (
+                    <Controller
+                      name="option_d"
+                      control={control}
+                      rules={{ required: "Option D is required" }}
+                      render={({ field, fieldState }) => (
+                        <Form.Item
+                          validateStatus={fieldState.error ? "error" : ""}
+                          help={fieldState.error?.message}
+                        >
+                          <div className="space-y-3">
+                            <div className="flex items-center space-x-3">
+                              <Radio
+                                checked={correctAnswer === "d"}
+                                onChange={() => setCorrectAnswer("d")}
+                                className="text-lg"
+                              />
+                              <span className="font-semibold text-gray-700">
+                                Option D
+                              </span>
+                            </div>
+                            <Input
+                              {...field}
+                              placeholder="Enter option D"
+                              size="large"
+                              className="border-2 border-gray-200 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300"
+                            />
+                          </div>
+                        </Form.Item>
+                      )}
+                    />
+                  )}
+                </div>
+
+                {/* Correct Answer Validation */}
+                <Controller
+                  name="correct_answer"
+                  control={control}
+                  rules={{ required: "Please select the correct answer" }}
+                  render={({ fieldState }) => (
+                    <Form.Item
+                      validateStatus={fieldState.error ? "error" : ""}
+                      help={fieldState.error?.message}
+                    >
+                      <input type="hidden" value={correctAnswer} />
+                    </Form.Item>
+                  )}
+                />
+              </div>
             )}
-          />
-        )}
 
-        <div className="flex justify-end space-x-2">
-          <Button onClick={onCancel}>Cancel</Button>
-          <Button type="primary" htmlType="submit">
-            {initialData ? "Update Question" : "Add Question"}
-          </Button>
-        </div>
-      </Form>
+            {/* Text Input Answer */}
+            {questionType === "input" && (
+              <Controller
+                name="correct_answer"
+                control={control}
+                rules={{
+                  required:
+                    "Correct answer is required for text input questions",
+                }}
+                render={({ field, fieldState }) => (
+                  <Form.Item
+                    label={
+                      <span className="text-gray-700 font-semibold text-lg">
+                        ✅ Correct Answer
+                      </span>
+                    }
+                    validateStatus={fieldState.error ? "error" : ""}
+                    help={fieldState.error?.message}
+                  >
+                    <Input
+                      {...field}
+                      placeholder="Enter the correct answer"
+                      size="large"
+                      className="border-2 border-gray-200 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300 shadow-sm focus:shadow-lg"
+                    />
+                  </Form.Item>
+                )}
+              />
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-4 pt-8 border-t border-gray-100 mt-8">
+            <Button
+              onClick={onCancel}
+              size="large"
+              className="h-12 px-8 border-2 border-gray-300 hover:border-gray-400 transition-all duration-300 rounded-xl font-medium"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              size="large"
+              className="h-12 px-8 bg-gradient-to-r from-blue-500 to-purple-600 border-0 hover:shadow-xl hover:scale-105 transition-all duration-300 rounded-xl font-medium"
+            >
+              {initialData ? "✏️ Update Question" : "➕ Add Question"}
+            </Button>
+          </div>
+        </Form>
+      </div>
     </Card>
-  )
-}
+  );
+};
 
-export default QuestionForm
+export default QuestionForm;
