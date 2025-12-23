@@ -30,7 +30,7 @@ import {
   useUpdateQuiz,
   useTogglePublishQuiz,
   useDeleteQuiz,
-} from "@/api/hooks/useQuizzes";
+} from "@/api/hooks/useAdminQuizzes";
 import {
   useCreateQuestion,
   useUpdateQuestion,
@@ -131,7 +131,18 @@ export default function EditQuizPage() {
       message.success("Quiz updated successfully");
       setUploading(false);
     } catch (error) {
-      message.error("Failed to update quiz");
+      const code = (error as any)?.code;
+      const msg = (error as any)?.message || "Failed to update quiz";
+      if (
+        code === "42501" ||
+        /row level security|permission denied/i.test(msg)
+      ) {
+        message.error(
+          "لا تملك صلاحية تحديث هذا الاختبار. اجعل حسابك مشرف (admin) أو عدّل سياسات RLS. راجع HOW_TO_MAKE_ADMIN.md"
+        );
+      } else {
+        message.error("Failed to update quiz");
+      }
       setUploading(false);
     }
   };
@@ -189,7 +200,18 @@ export default function EditQuizPage() {
       setDeleteQuestionModalVisible(false);
       setQuestionToDelete(null);
     } catch (error) {
-      message.error("Failed to delete question");
+      const code = (error as any)?.code;
+      const msg = (error as any)?.message || "Failed to delete question";
+      if (
+        code === "42501" ||
+        /row level security|permission denied/i.test(msg)
+      ) {
+        message.error(
+          "لا تملك صلاحية حذف الأسئلة. يلزم دور المشرف (admin) أو تحديث سياسات RLS."
+        );
+      } else {
+        message.error("Failed to delete question");
+      }
     }
   };
 
@@ -216,7 +238,18 @@ export default function EditQuizPage() {
       }
       setShowQuestionForm(false);
     } catch (error) {
-      message.error("Failed to save question");
+      const code = (error as any)?.code;
+      const msg = (error as any)?.message || "Failed to save question";
+      if (
+        code === "42501" ||
+        /row level security|permission denied/i.test(msg)
+      ) {
+        message.error(
+          "لا تملك صلاحية حفظ الأسئلة. اجعل حسابك مشرف (admin) أو حدّث سياسات RLS. راجع HOW_TO_MAKE_ADMIN.md"
+        );
+      } else {
+        message.error("Failed to save question");
+      }
     }
   };
 
@@ -287,7 +320,7 @@ export default function EditQuizPage() {
 
   if (isLoadingQuiz || isLoadingQuestions) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div dir="rtl" className="flex justify-center items-center h-64">
         <Spin size="large" />
       </div>
     );
@@ -295,22 +328,23 @@ export default function EditQuizPage() {
 
   if (!quiz) {
     return (
-      <div className="text-center">
+      <div dir="rtl" className="text-center">
         <Title level={4} className="text-red-500">
-          Quiz not found
+          الاختبار غير موجود
         </Title>
-        <Paragraph>
-          The quiz you're looking for doesn't exist or has been removed.
-        </Paragraph>
+        <Paragraph>الاختبار الذي تبحث عنه غير موجود أو تم حذفه.</Paragraph>
         <Button type="primary" onClick={() => router.push("/quizzes")}>
-          Back to Quizzes
+          العودة إلى الاختبارات
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div
+      dir="rtl"
+      className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-right"
+    >
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header Section */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
@@ -320,10 +354,10 @@ export default function EditQuizPage() {
                 level={1}
                 className="mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
               >
-                Edit Quiz
+                تعديل الاختبار
               </Title>
               <Paragraph className="text-gray-600 text-lg">
-                Customize your quiz and manage questions
+                خصص اختبارك وأدر الأسئلة
               </Paragraph>
             </div>
 
@@ -331,13 +365,13 @@ export default function EditQuizPage() {
               {quiz.published && (
                 <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
                   <span className="text-sm text-green-700 font-medium">
-                    Share:
+                    مشاركة:
                   </span>
                   <CopyToClipboard
                     text={shareUrl}
-                    onCopy={() => message.success("Link copied to clipboard!")}
+                    onCopy={() => message.success("تم نسخ الرابط في الحافظة!")}
                   >
-                    <Tooltip title="Copy link">
+                    <Tooltip title="نسخ الرابط">
                       <Button
                         icon={<LinkOutlined />}
                         size="small"
@@ -360,7 +394,7 @@ export default function EditQuizPage() {
                 className="bg-gray-50 border-gray-200 hover:bg-gray-100 transition-all duration-200"
                 size="large"
               >
-                {quiz.published ? "View Live" : "Preview"}
+                {quiz.published ? "عرض مباشر" : "معاينة"}
               </Button>
 
               <Button
@@ -376,7 +410,7 @@ export default function EditQuizPage() {
                     : "bg-gradient-to-r from-blue-500 to-purple-600 border-0 hover:shadow-lg hover:scale-105"
                 }`}
               >
-                {quiz.published ? "Unpublish" : "Publish Quiz"}
+                {quiz.published ? "إلغاء النشر" : "نشر الاختبار"}
               </Button>
               <Button
                 danger
@@ -385,7 +419,7 @@ export default function EditQuizPage() {
                 size="large"
                 className="hover:shadow-lg transition-all duration-200"
               >
-                Delete Quiz
+                حذف الاختبار
               </Button>
             </div>
           </div>
@@ -395,10 +429,10 @@ export default function EditQuizPage() {
         <Card className="mb-8 shadow-sm border-0 rounded-2xl overflow-hidden bg-white">
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 border-b border-gray-100">
             <Title level={3} className="mb-2 text-gray-800">
-              Quiz Details
+              تفاصيل الاختبار
             </Title>
             <Paragraph className="text-gray-600 mb-0">
-              Update your quiz information and cover image
+              حدّث معلومات اختبارك والصورة الغلاف
             </Paragraph>
           </div>
 
@@ -416,34 +450,28 @@ export default function EditQuizPage() {
                   <Form.Item
                     label={
                       <span className="text-gray-700 font-medium">
-                        Quiz Title
+                        عنوان الاختبار
                       </span>
                     }
                     name="title"
-                    rules={[
-                      { required: true, message: "Please enter a title" },
-                    ]}
+                    rules={[{ required: true, message: "يرجى إدخال عنوان" }]}
                   >
                     <Input
-                      placeholder="Enter an engaging quiz title"
+                      placeholder="أدخل عنوان اختبار جذاب"
                       className="h-12 text-lg border-gray-200 rounded-lg hover:border-blue-400 focus:border-blue-500 transition-colors"
                     />
                   </Form.Item>
 
                   <Form.Item
                     label={
-                      <span className="text-gray-700 font-medium">
-                        Description
-                      </span>
+                      <span className="text-gray-700 font-medium">الوصف</span>
                     }
                     name="description"
-                    rules={[
-                      { required: true, message: "Please enter a description" },
-                    ]}
+                    rules={[{ required: true, message: "يرجى إدخال وصف" }]}
                   >
                     <TextArea
                       rows={4}
-                      placeholder="Describe what this quiz is about..."
+                      placeholder="صف ما يتعلق به هذا الاختبار..."
                       className="border-gray-200 rounded-lg hover:border-blue-400 focus:border-blue-500 transition-colors"
                     />
                   </Form.Item>
@@ -453,7 +481,7 @@ export default function EditQuizPage() {
                   <Form.Item
                     label={
                       <span className="text-gray-700 font-medium">
-                        Cover Image
+                        صورة الغلاف
                       </span>
                     }
                   >
@@ -465,7 +493,7 @@ export default function EditQuizPage() {
                         >
                           <Image
                             src={previewImage || "/placeholder.svg"}
-                            alt="Cover preview"
+                            alt="معاينة الغلاف"
                             fill
                             className="object-cover group-hover:scale-105 transition-transform duration-300"
                           />
@@ -481,7 +509,7 @@ export default function EditQuizPage() {
                           }}
                           className="mt-3 border-gray-300 hover:border-blue-400 transition-colors"
                         >
-                          Change Image
+                          تغيير الصورة
                         </Button>
                       </div>
                     ) : (
@@ -494,10 +522,10 @@ export default function EditQuizPage() {
                           <InboxOutlined className="text-4xl text-blue-500" />
                         </p>
                         <p className="ant-upload-text text-gray-700 font-medium">
-                          Click or drag file to upload
+                          انقر أو اسحب الملف للتحميل
                         </p>
                         <p className="ant-upload-hint text-gray-500">
-                          Support for single image upload. Max size: 2MB
+                          دعم تحميل صورة واحدة. الحد الأقصى: 2 ميجابايت
                         </p>
                       </Dragger>
                     )}
@@ -513,7 +541,7 @@ export default function EditQuizPage() {
                   size="large"
                   className="bg-gradient-to-r from-blue-500 to-purple-600 border-0 hover:shadow-lg hover:scale-105 transition-all duration-200"
                 >
-                  Update Quiz Details
+                  تحديث تفاصيل الاختبار
                 </Button>
               </Form.Item>
             </Form>
@@ -526,10 +554,10 @@ export default function EditQuizPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <Title level={3} className="mb-2 text-gray-800">
-                  Questions ({questions.length})
+                  الأسئلة ({questions.length})
                 </Title>
                 <Paragraph className="text-gray-600 mb-0">
-                  Drag questions to reorder them
+                  اسحب الأسئلة لإعادة ترتيبها
                 </Paragraph>
               </div>
               <Button
@@ -539,7 +567,7 @@ export default function EditQuizPage() {
                 size="large"
                 className="bg-gradient-to-r from-green-500 to-blue-500 border-0 hover:shadow-lg hover:scale-105 transition-all duration-200"
               >
-                Add Question
+                إضافة سؤال
               </Button>
             </div>
           </div>
@@ -567,14 +595,14 @@ export default function EditQuizPage() {
         {/* Image Preview Modal */}
         <Modal
           open={previewVisible}
-          title="Cover Image Preview"
+          title="معاينة صورة الغلاف"
           footer={null}
           onCancel={() => setPreviewVisible(false)}
           className="rounded-2xl overflow-hidden"
         >
           {previewImage && (
             <img
-              alt="Cover preview"
+              alt="معاينة الغلاف"
               style={{ width: "100%" }}
               src={previewImage || "/placeholder.svg"}
               className="rounded-lg"
@@ -587,19 +615,19 @@ export default function EditQuizPage() {
           title={
             <div className="flex items-center gap-2">
               <ExclamationCircleOutlined className="text-red-500" />
-              <span>Delete Question</span>
+              <span>حذف السؤال</span>
             </div>
           }
           open={deleteQuestionModalVisible}
           onOk={handleDeleteQuestionConfirm}
           onCancel={handleDeleteQuestionCancel}
-          okText="Delete"
-          cancelText="Cancel"
+          okText="حذف"
+          cancelText="إلغاء"
           okType="danger"
           confirmLoading={deleteQuestionMutation.isPending}
         >
-          <p>Are you sure you want to delete this question?</p>
-          <p className="text-gray-500">This action cannot be undone.</p>
+          <p>هل أنت متأكد أنك تريد حذف هذا السؤال؟</p>
+          <p className="text-gray-500">لا يمكن التراجع عن هذا الإجراء.</p>
         </Modal>
 
         {/* Delete Quiz Modal */}
@@ -607,22 +635,22 @@ export default function EditQuizPage() {
           title={
             <div className="flex items-center gap-2">
               <DeleteOutlined className="text-red-500" />
-              <span>Delete Quiz</span>
+              <span>حذف الاختبار</span>
             </div>
           }
           open={deleteQuizModalVisible}
           onOk={handleDeleteQuizConfirm}
           onCancel={handleDeleteQuizCancel}
-          okText="Delete Quiz"
-          cancelText="Cancel"
+          okText="حذف الاختبار"
+          cancelText="إلغاء"
           okType="danger"
           confirmLoading={deleteQuizMutation.isPending}
         >
           <p>
-            Are you sure you want to delete <strong>"{quiz?.title}"</strong>?
+            هل أنت متأكد أنك تريد حذف <strong>"{quiz?.title}"</strong>؟
           </p>
           <p className="text-gray-500">
-            This action cannot be undone and will remove all questions.
+            لا يمكن التراجع عن هذا الإجراء وسيؤدي إلى إزالة جميع الأسئلة.
           </p>
         </Modal>
       </div>

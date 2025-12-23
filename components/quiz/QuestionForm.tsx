@@ -72,13 +72,16 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   };
 
   return (
-    <Card className="shadow-xl border-0 rounded-3xl overflow-hidden bg-white animate-fade-in-up">
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-8 border-b border-gray-100">
-        <Title level={3} className="mb-3 text-gray-800">
-          {initialData ? "✏️ Edit Question" : "➕ Add New Question"}
+    <Card
+      dir="rtl"
+      className="shadow-2xl border-0 rounded-3xl overflow-hidden bg-white animate-fade-in-up"
+    >
+      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 p-8 border-b border-gray-200">
+        <Title level={3} className="mb-3 text-gray-900 font-bold">
+          {initialData ? "✏️ تعديل السؤال" : "➕ إضافة سؤال جديد"}
         </Title>
         <Paragraph className="text-gray-600 mb-0 text-lg">
-          Create engaging questions for your quiz
+          أنشئ أسئلة جذابة لاختبارك
         </Paragraph>
       </div>
 
@@ -89,12 +92,12 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
             <Controller
               name="question_text"
               control={control}
-              rules={{ required: "Question text is required" }}
+              rules={{ required: "نص السؤال مطلوب" }}
               render={({ field, fieldState }) => (
                 <Form.Item
                   label={
-                    <span className="text-gray-700 font-semibold text-lg">
-                      📝 Question Text
+                    <span className="text-gray-800 font-bold text-lg flex items-center gap-2">
+                      📝 نص السؤال
                     </span>
                   }
                   validateStatus={fieldState.error ? "error" : ""}
@@ -102,9 +105,9 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                 >
                   <TextArea
                     {...field}
-                    rows={3}
-                    placeholder="Enter your question here..."
-                    className="text-lg border-2 border-gray-200 rounded-2xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300 shadow-sm focus:shadow-lg"
+                    rows={4}
+                    placeholder="اكتب سؤالك هنا..."
+                    className="text-lg border-2 border-gray-300 rounded-2xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300 shadow-sm focus:shadow-md"
                   />
                 </Form.Item>
               )}
@@ -114,12 +117,12 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
             <Controller
               name="question_type"
               control={control}
-              rules={{ required: "Question type is required" }}
+              rules={{ required: "نوع السؤال مطلوب" }}
               render={({ field, fieldState }) => (
                 <Form.Item
                   label={
-                    <span className="text-gray-700 font-semibold text-lg">
-                      🎯 Question Type
+                    <span className="text-gray-800 font-bold text-lg flex items-center gap-2">
+                      🎯 نوع السؤال
                     </span>
                   }
                   validateStatus={fieldState.error ? "error" : ""}
@@ -127,7 +130,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                 >
                   <Select
                     {...field}
-                    placeholder="Select question type"
+                    placeholder="اختر نوع السؤال"
                     size="large"
                     className="rounded-2xl"
                     onChange={(value) => {
@@ -136,25 +139,25 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                     }}
                   >
                     <Option value="two_choices">
-                      <div className="flex items-center space-x-3 py-2">
+                      <div className="flex items-center gap-3 py-2">
                         <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <span className="font-medium">
-                          Two Choices (Binary Choice)
+                        <span className="font-semibold">
+                          خياران (اختيار ثنائي)
                         </span>
                       </div>
                     </Option>
                     <Option value="four_choices">
-                      <div className="flex items-center space-x-3 py-2">
+                      <div className="flex items-center gap-3 py-2">
                         <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                        <span className="font-medium">
-                          Four Choices (Multiple Choice)
+                        <span className="font-semibold">
+                          أربعة خيارات (اختيار متعدد)
                         </span>
                       </div>
                     </Option>
                     <Option value="input">
-                      <div className="flex items-center space-x-3 py-2">
+                      <div className="flex items-center gap-3 py-2">
                         <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                        <span className="font-medium">Text Input</span>
+                        <span className="font-semibold">إدخال نصي</span>
                       </div>
                     </Option>
                   </Select>
@@ -165,13 +168,13 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
             {/* Answer Options */}
             {(questionType === "two_choices" ||
               questionType === "four_choices") && (
-              <div className="space-y-6">
+              <div className="space-y-6 bg-gradient-to-r from-gray-50 to-blue-50 p-6 rounded-2xl border border-gray-200">
                 <div className="flex justify-between items-center">
-                  <Title level={4} className="mb-0 text-gray-700">
-                    🎨 Answer Options
+                  <Title level={4} className="mb-0 text-gray-900 font-bold">
+                    🎨 خيارات الإجابة
                   </Title>
-                  <Paragraph className="text-sm text-gray-500 mb-0">
-                    Select the correct answer below
+                  <Paragraph className="text-sm text-gray-600 mb-0 font-medium">
+                    اختر الإجابة الصحيحة أدناه
                   </Paragraph>
                 </div>
 
@@ -180,28 +183,28 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                   <Controller
                     name="option_a"
                     control={control}
-                    rules={{ required: "Option A is required" }}
+                    rules={{ required: "الخيار أ مطلوب" }}
                     render={({ field, fieldState }) => (
                       <Form.Item
                         validateStatus={fieldState.error ? "error" : ""}
                         help={fieldState.error?.message}
                       >
-                        <div className="space-y-3">
-                          <div className="flex items-center space-x-3">
+                        <div className="space-y-3 bg-white p-4 rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-all">
+                          <div className="flex items-center gap-3">
                             <Radio
                               checked={correctAnswer === "a"}
                               onChange={() => setCorrectAnswer("a")}
                               className="text-lg"
                             />
-                            <span className="font-semibold text-gray-700">
-                              Option A
+                            <span className="font-bold text-gray-800 text-base">
+                              الخيار أ
                             </span>
                           </div>
                           <Input
                             {...field}
-                            placeholder="Enter option A"
+                            placeholder="أدخل الخيار أ"
                             size="large"
-                            className="border-2 border-gray-200 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300"
+                            className="border-2 border-gray-300 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300"
                           />
                         </div>
                       </Form.Item>
@@ -212,28 +215,28 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                   <Controller
                     name="option_b"
                     control={control}
-                    rules={{ required: "Option B is required" }}
+                    rules={{ required: "الخيار ب مطلوب" }}
                     render={({ field, fieldState }) => (
                       <Form.Item
                         validateStatus={fieldState.error ? "error" : ""}
                         help={fieldState.error?.message}
                       >
-                        <div className="space-y-3">
-                          <div className="flex items-center space-x-3">
+                        <div className="space-y-3 bg-white p-4 rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-all">
+                          <div className="flex items-center gap-3">
                             <Radio
                               checked={correctAnswer === "b"}
                               onChange={() => setCorrectAnswer("b")}
                               className="text-lg"
                             />
-                            <span className="font-semibold text-gray-700">
-                              Option B
+                            <span className="font-bold text-gray-800 text-base">
+                              الخيار ب
                             </span>
                           </div>
                           <Input
                             {...field}
-                            placeholder="Enter option B"
+                            placeholder="أدخل الخيار ب"
                             size="large"
-                            className="border-2 border-gray-200 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300"
+                            className="border-2 border-gray-300 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300"
                           />
                         </div>
                       </Form.Item>
@@ -245,28 +248,28 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                     <Controller
                       name="option_c"
                       control={control}
-                      rules={{ required: "Option C is required" }}
+                      rules={{ required: "الخيار ج مطلوب" }}
                       render={({ field, fieldState }) => (
                         <Form.Item
                           validateStatus={fieldState.error ? "error" : ""}
                           help={fieldState.error?.message}
                         >
-                          <div className="space-y-3">
-                            <div className="flex items-center space-x-3">
+                          <div className="space-y-3 bg-white p-4 rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-all">
+                            <div className="flex items-center gap-3">
                               <Radio
                                 checked={correctAnswer === "c"}
                                 onChange={() => setCorrectAnswer("c")}
                                 className="text-lg"
                               />
-                              <span className="font-semibold text-gray-700">
-                                Option C
+                              <span className="font-bold text-gray-800 text-base">
+                                الخيار ج
                               </span>
                             </div>
                             <Input
                               {...field}
-                              placeholder="Enter option C"
+                              placeholder="أدخل الخيار ج"
                               size="large"
-                              className="border-2 border-gray-200 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300"
+                              className="border-2 border-gray-300 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300"
                             />
                           </div>
                         </Form.Item>
@@ -279,28 +282,28 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                     <Controller
                       name="option_d"
                       control={control}
-                      rules={{ required: "Option D is required" }}
+                      rules={{ required: "الخيار د مطلوب" }}
                       render={({ field, fieldState }) => (
                         <Form.Item
                           validateStatus={fieldState.error ? "error" : ""}
                           help={fieldState.error?.message}
                         >
-                          <div className="space-y-3">
-                            <div className="flex items-center space-x-3">
+                          <div className="space-y-3 bg-white p-4 rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-all">
+                            <div className="flex items-center gap-3">
                               <Radio
                                 checked={correctAnswer === "d"}
                                 onChange={() => setCorrectAnswer("d")}
                                 className="text-lg"
                               />
-                              <span className="font-semibold text-gray-700">
-                                Option D
+                              <span className="font-bold text-gray-800 text-base">
+                                الخيار د
                               </span>
                             </div>
                             <Input
                               {...field}
-                              placeholder="Enter option D"
+                              placeholder="أدخل الخيار د"
                               size="large"
-                              className="border-2 border-gray-200 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300"
+                              className="border-2 border-gray-300 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300"
                             />
                           </div>
                         </Form.Item>
@@ -313,7 +316,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                 <Controller
                   name="correct_answer"
                   control={control}
-                  rules={{ required: "Please select the correct answer" }}
+                  rules={{ required: "يرجى اختيار الإجابة الصحيحة" }}
                   render={({ fieldState }) => (
                     <Form.Item
                       validateStatus={fieldState.error ? "error" : ""}
@@ -332,14 +335,13 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                 name="correct_answer"
                 control={control}
                 rules={{
-                  required:
-                    "Correct answer is required for text input questions",
+                  required: "الإجابة الصحيحة مطلوبة لأسئلة الإدخال النصي",
                 }}
                 render={({ field, fieldState }) => (
                   <Form.Item
                     label={
-                      <span className="text-gray-700 font-semibold text-lg">
-                        ✅ Correct Answer
+                      <span className="text-gray-800 font-bold text-lg flex items-center gap-2">
+                        ✅ الإجابة الصحيحة
                       </span>
                     }
                     validateStatus={fieldState.error ? "error" : ""}
@@ -347,9 +349,9 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                   >
                     <Input
                       {...field}
-                      placeholder="Enter the correct answer"
+                      placeholder="أدخل الإجابة الصحيحة"
                       size="large"
-                      className="border-2 border-gray-200 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300 shadow-sm focus:shadow-lg"
+                      className="border-2 border-gray-300 rounded-xl hover:border-blue-400 focus:border-blue-500 transition-all duration-300 shadow-sm focus:shadow-md"
                     />
                   </Form.Item>
                 )}
@@ -358,21 +360,21 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end space-x-4 pt-8 border-t border-gray-100 mt-8">
+          <div className="flex justify-end gap-4 pt-8 border-t-2 border-gray-200 mt-8">
             <Button
               onClick={onCancel}
               size="large"
-              className="h-12 px-8 border-2 border-gray-300 hover:border-gray-400 transition-all duration-300 rounded-xl font-medium"
+              className="h-12 px-10 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all duration-300 rounded-xl font-bold text-base"
             >
-              Cancel
+              إلغاء
             </Button>
             <Button
               type="primary"
               htmlType="submit"
               size="large"
-              className="h-12 px-8 bg-gradient-to-r from-blue-500 to-purple-600 border-0 hover:shadow-xl hover:scale-105 transition-all duration-300 rounded-xl font-medium"
+              className="h-12 px-10 bg-gradient-to-r from-blue-500 to-purple-600 border-0 hover:shadow-2xl hover:scale-105 transition-all duration-300 rounded-xl font-bold text-base"
             >
-              {initialData ? "✏️ Update Question" : "➕ Add Question"}
+              {initialData ? "✏️ تحديث السؤال" : "➕ إضافة السؤال"}
             </Button>
           </div>
         </Form>

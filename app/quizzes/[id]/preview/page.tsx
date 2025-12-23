@@ -1,82 +1,90 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { Typography, Button, Spin, Space, message, Card } from "antd"
-import { EditOutlined, CheckOutlined } from "@ant-design/icons"
-import { useQuiz } from "@/api/hooks/useQuiz"
-import { useQuizQuestions } from "@/api/hooks/useQuestions"
-import { useTogglePublishQuiz } from "@/api/hooks/useQuizzes"
-import QuizPreview from "@/components/quiz/QuizPreview"
-import { useAuth } from "@/lib/auth"
-import Image from "next/image"
+import { useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Typography, Button, Spin, Space, message, Card } from "antd";
+import { EditOutlined, CheckOutlined } from "@ant-design/icons";
+import { useQuiz } from "@/api/hooks/useQuiz";
+import { useQuizQuestions } from "@/api/hooks/useQuestions";
+import { useTogglePublishQuiz } from "@/api/hooks/useAdminQuizzes";
+import QuizPreview from "@/components/quiz/QuizPreview";
+import { useAuth } from "@/lib/auth";
+import Image from "next/image";
 
-const { Title, Paragraph } = Typography
+const { Title, Paragraph } = Typography;
 
 export default function PreviewQuizPage() {
-  const params = useParams()
-  const router = useRouter()
-  const quizId = params.id as string
-  const { user } = useAuth()
+  const params = useParams();
+  const router = useRouter();
+  const quizId = params.id as string;
+  const { user } = useAuth();
 
-  const { data: quiz, isLoading: isLoadingQuiz } = useQuiz(quizId)
-  const { data: questions = [], isLoading: isLoadingQuestions } = useQuizQuestions(quizId)
-  const togglePublishMutation = useTogglePublishQuiz()
+  const { data: quiz, isLoading: isLoadingQuiz } = useQuiz(quizId);
+  const { data: questions = [], isLoading: isLoadingQuestions } =
+    useQuizQuestions(quizId);
+  const togglePublishMutation = useTogglePublishQuiz();
 
-  // Check if user is the owner of the quiz
   useEffect(() => {
     if (quiz && user && quiz.author_id !== user.id) {
-      message.error("You don't have permission to preview this quiz")
-      router.push("/quizzes")
+      message.error("ليست لديك صلاحية لمعاينة هذا الاختبار");
+      router.push("/quizzes");
     }
-  }, [quiz, user, router])
+  }, [quiz, user, router]);
 
   const handlePublish = async () => {
     if (questions.length === 0) {
-      message.error("Cannot publish a quiz with no questions")
-      return
+      message.error("لا يمكن نشر اختبار بدون أسئلة");
+      return;
     }
 
     await togglePublishMutation.mutateAsync({
       id: quizId,
       publish: true,
-    })
-    message.success("Quiz published successfully")
-    router.push(`/quizzes/${quizId}/published`)
-  }
+    });
+    message.success("تم نشر الاختبار بنجاح");
+    router.push(`/quizzes/${quizId}/published`);
+  };
 
   if (isLoadingQuiz || isLoadingQuestions) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div dir="rtl" className="flex justify-center items-center h-64">
         <Spin size="large" />
       </div>
-    )
+    );
   }
 
   if (!quiz) {
     return (
-      <div className="text-center">
+      <div dir="rtl" className="text-center">
         <Title level={4} className="text-red-500">
-          Quiz not found
+          لم يتم العثور على الاختبار
         </Title>
-        <Paragraph>The quiz you're looking for doesn't exist or has been removed.</Paragraph>
+        <Paragraph>الاختبار الذي تبحث عنه غير موجود أو تم حذفه.</Paragraph>
         <Button type="primary" onClick={() => router.push("/quizzes")}>
-          Back to Quizzes
+          العودة إلى الاختبارات
         </Button>
       </div>
-    )
+    );
   }
 
   return (
-    <div>
+    <div dir="rtl" className="text-right">
       <div className="flex justify-between items-center mb-6">
-        <Title level={2}>Preview Quiz</Title>
+        <Title level={2}>معاينة الاختبار</Title>
         <Space>
-          <Button icon={<EditOutlined />} onClick={() => router.push(`/quizzes/${quizId}`)}>
-            Edit
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => router.push(`/quizzes/${quizId}`)}
+          >
+            تعديل
           </Button>
-          <Button type="primary" icon={<CheckOutlined />} onClick={handlePublish} disabled={questions.length === 0}>
-            Publish
+          <Button
+            type="primary"
+            icon={<CheckOutlined />}
+            onClick={handlePublish}
+            disabled={questions.length === 0}
+          >
+            نشر
           </Button>
         </Space>
       </div>
@@ -100,5 +108,5 @@ export default function PreviewQuizPage() {
 
       <QuizPreview quiz={quiz} questions={questions} readOnly={true} />
     </div>
-  )
+  );
 }

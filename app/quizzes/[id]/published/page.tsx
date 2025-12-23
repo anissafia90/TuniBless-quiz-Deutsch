@@ -22,7 +22,7 @@ export default function PublishedQuizPage() {
 
   if (isLoadingQuiz || isLoadingQuestions) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div dir="rtl" className="flex justify-center items-center h-64">
         <Spin size="large" />
       </div>
     );
@@ -30,15 +30,15 @@ export default function PublishedQuizPage() {
 
   if (!quiz) {
     return (
-      <div className="text-center">
+      <div dir="rtl" className="text-center">
         <Result
           status="404"
-          title="Quiz Not Found"
-          subTitle="The quiz you're looking for doesn't exist or has been removed."
+          title="الاختبار غير موجود"
+          subTitle="الاختبار الذي تبحث عنه غير موجود أو تم حذفه."
           extra={
             <Link href="/quizzes">
               <Button type="primary" icon={<HomeOutlined />}>
-                Back to Quizzes
+                العودة إلى الاختبارات
               </Button>
             </Link>
           }
@@ -49,15 +49,15 @@ export default function PublishedQuizPage() {
 
   if (!quiz.published) {
     return (
-      <div className="text-center">
+      <div dir="rtl" className="text-center">
         <Result
           status="warning"
-          title="Quiz Not Published"
-          subTitle="This quiz has not been published yet."
+          title="الاختبار غير منشور"
+          subTitle="هذا الاختبار لم يتم نشره بعد."
           extra={
             <Link href="/quizzes">
               <Button type="primary" icon={<HomeOutlined />}>
-                Back to Quizzes
+                العودة إلى الاختبارات
               </Button>
             </Link>
           }
@@ -67,7 +67,10 @@ export default function PublishedQuizPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div
+      dir="rtl"
+      className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 text-right"
+    >
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Back Button */}
         <div className="mb-8">
@@ -77,7 +80,7 @@ export default function PublishedQuizPage() {
               icon={<ArrowLeftOutlined />}
               className="h-12 px-6 bg-white/80 backdrop-blur-sm border border-gray-200 hover:bg-white hover:border-blue-300 transition-all duration-200 rounded-xl shadow-sm"
             >
-              <span className="ml-2">Back to Quizzes</span>
+              <span className="ml-2">العودة إلى الاختبارات</span>
             </Button>
           </Link>
         </div>
@@ -94,7 +97,7 @@ export default function PublishedQuizPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-8">
-                <div className="max-w-3xl">
+                <div className="max-w-3xl text-right">
                   <Title
                     level={1}
                     className="text-white mb-4 text-4xl md:text-5xl font-bold leading-tight"
@@ -104,12 +107,12 @@ export default function PublishedQuizPage() {
                   <Paragraph className="text-white/90 text-xl mb-4 leading-relaxed">
                     {quiz.description}
                   </Paragraph>
-                  <div className="flex items-center space-x-4 text-white/80">
+                  <div className="flex items-center gap-4 text-white/80">
                     <span className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium">
                       📅 {new Date(quiz.created_at).toLocaleDateString()}
                     </span>
                     <span className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium">
-                      ✨ Published Quiz
+                      ✨ اختبار منشور
                     </span>
                   </div>
                 </div>
@@ -128,12 +131,12 @@ export default function PublishedQuizPage() {
               <Paragraph className="text-white/90 text-xl mb-6 max-w-3xl mx-auto leading-relaxed">
                 {quiz.description}
               </Paragraph>
-              <div className="flex items-center justify-center space-x-4 text-white/80">
+              <div className="flex items-center justify-center gap-4 text-white/80">
                 <span className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium">
                   📅 {new Date(quiz.created_at).toLocaleDateString()}
                 </span>
                 <span className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium">
-                  ✨ Published Quiz
+                  ✨ اختبار منشور
                 </span>
               </div>
             </div>

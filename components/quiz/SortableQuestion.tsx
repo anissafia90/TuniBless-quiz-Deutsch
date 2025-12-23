@@ -45,13 +45,13 @@ export function SortableQuestion({
   const getQuestionTypeLabel = (type: string) => {
     switch (type) {
       case "two_choices":
-        return <Tag color="blue">Two Choices</Tag>;
+        return <Tag color="blue">🔄 خياران</Tag>;
       case "four_choices":
-        return <Tag color="purple">Four Choices</Tag>;
+        return <Tag color="purple">📋 اختيار متعدد</Tag>;
       case "input":
-        return <Tag color="green">Text Input</Tag>;
+        return <Tag color="green">✍️ إدخال نصي</Tag>;
       default:
-        return <Tag>Unknown</Tag>;
+        return <Tag>غير معروف</Tag>;
     }
   };
 
@@ -64,35 +64,39 @@ export function SortableQuestion({
     <div ref={setNodeRef} style={style} className="mb-6">
       <Card
         className={`
-        border-0 shadow-md hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden
-        ${isDragging ? "shadow-2xl scale-105 rotate-2" : "hover:-translate-y-1"}
+        border-0 shadow-lg hover:shadow-2xl transition-all duration-300 rounded-3xl overflow-hidden
+        ${
+          isDragging
+            ? "shadow-2xl scale-105 rotate-2 border-2 border-blue-400"
+            : "hover:-translate-y-2"
+        }
         bg-white
       `}
       >
         <div className="p-6">
-          <div className="flex items-start space-x-4">
+          <div className="flex items-start gap-4" dir="rtl">
             {/* Drag Handle */}
             <Button
               type="text"
               icon={<MenuOutlined />}
-              className="cursor-grab hover:cursor-grabbing text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all duration-200 rounded-xl mt-1"
+              className="cursor-grab hover:cursor-grabbing text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all duration-200 rounded-xl mt-1 hover:scale-110"
               {...attributes}
               {...listeners}
             />
 
             {/* Question Number Badge */}
-            <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md">
+            <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200">
               {index + 1}
             </div>
 
             {/* Question Content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between mb-4">
-                <div className="flex-1 pr-4">
-                  <div className="flex items-center space-x-3 mb-2">
+                <div className="flex-1 pl-4">
+                  <div className="flex items-center gap-3 mb-2 flex-wrap">
                     <Title
                       level={5}
-                      className="mb-0 text-gray-800 line-clamp-2"
+                      className="mb-0 text-gray-900 line-clamp-2 font-bold text-right"
                     >
                       {question.question_text}
                     </Title>
@@ -101,19 +105,19 @@ export function SortableQuestion({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex space-x-2">
+                <div className="flex gap-2">
                   <Button
                     type="text"
                     icon={<EditOutlined />}
                     onClick={() => onEdit(question)}
-                    className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 transition-all duration-200 rounded-xl"
+                    className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 transition-all duration-200 rounded-xl hover:scale-110"
                   />
                   <Button
                     type="text"
                     danger
                     icon={<DeleteOutlined />}
                     onClick={() => onDelete(question.id)}
-                    className="hover:bg-red-50 transition-all duration-200 rounded-xl"
+                    className="hover:bg-red-50 transition-all duration-200 rounded-xl hover:scale-110"
                   />
                 </div>
               </div>
@@ -122,46 +126,46 @@ export function SortableQuestion({
               {(question.question_type === "two_choices" ||
                 question.question_type === "four_choices") && (
                 <div className="space-y-3">
-                  <Text className="text-sm text-gray-500 font-medium">
-                    Answer Options:
+                  <Text className="text-sm text-gray-600 font-bold">
+                    🎨 خيارات الإجابة:
                   </Text>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {getSortedOptions(question.options).map(([key, value]) => (
                       <div
                         key={key}
                         className={`
-                        p-4 rounded-xl border-2 transition-all duration-200
+                        p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md
                         ${
                           key === question.correct_answer
-                            ? "bg-green-50 border-green-200 shadow-sm"
-                            : "bg-gray-50 border-gray-200"
+                            ? "bg-green-50 border-green-300 shadow-sm hover:shadow-green-200"
+                            : "bg-gray-50 border-gray-300 hover:border-gray-400"
                         }
                       `}
                       >
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center gap-3">
                           <div
                             className={`
                           w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
                           ${
                             key === question.correct_answer
-                              ? "bg-green-500 text-white"
-                              : "bg-gray-300 text-gray-600"
+                              ? "bg-green-500 text-white shadow-md"
+                              : "bg-gray-400 text-gray-600"
                           }
                         `}
                           >
                             {key.toUpperCase()}
                           </div>
                           <span
-                            className={`flex-1 ${
+                            className={`flex-1 text-right ${
                               key === question.correct_answer
-                                ? "font-medium text-green-800"
-                                : "text-gray-700"
+                                ? "font-bold text-green-800"
+                                : "text-gray-800"
                             }`}
                           >
                             {value}
                           </span>
                           {key === question.correct_answer && (
-                            <CheckCircleOutlined className="text-green-500 text-lg" />
+                            <CheckCircleOutlined className="text-green-600 text-lg font-bold" />
                           )}
                         </div>
                       </div>
@@ -173,13 +177,13 @@ export function SortableQuestion({
               {/* Text Input Answer */}
               {question.question_type === "input" && (
                 <div className="space-y-3">
-                  <Text className="text-sm text-gray-500 font-medium">
-                    Correct Answer:
+                  <Text className="text-sm text-gray-600 font-bold">
+                    ✅ الإجابة الصحيحة:
                   </Text>
-                  <div className="p-4 bg-green-50 border-2 border-green-200 rounded-xl">
-                    <div className="flex items-center space-x-3">
-                      <CheckCircleOutlined className="text-green-500 text-lg" />
-                      <span className="font-medium text-green-800">
+                  <div className="p-4 bg-green-50 border-2 border-green-300 rounded-xl shadow-sm hover:shadow-green-200 transition-all duration-200">
+                    <div className="flex items-center gap-3">
+                      <CheckCircleOutlined className="text-green-600 text-lg font-bold" />
+                      <span className="font-bold text-green-800 text-right flex-1">
                         {question.correct_answer}
                       </span>
                     </div>

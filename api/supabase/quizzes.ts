@@ -12,18 +12,76 @@ export const getQuizzes = async (
   const to = from + pageSize - 1;
 
   try {
-    // First get the total count
-    let countQuery = supabase
+    // First get the total count - only count published quizzes for public view
+    // Use head:true with a minimal selection to avoid unnecessary clauses
+    const { count, error: countError } = await supabase
       .from("quizzes")
-      .select("*", { count: "exact", head: true })
-      .order("created_at", { ascending: true });
-
-    // If it's a public route, only show published quizzes
-
-    const { count, error: countError } = await countQuery;
+      .select("id", { count: "exact", head: true })
+      .eq("published", true);
 
     if (countError) {
       console.error("Error counting quizzes:", countError);
+      throw countError;
+    }
+
+    console.log("📊 Published quizzes count:", count);
+
+    // Then get the paginated data - only published quizzes
+    let dataQuery = supabase
+      .from("quizzes")
+      .select("*")
+      .eq("published", true)
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (searchTerm) {
+      dataQuery = dataQuery.ilike("title", `%${searchTerm}%`);
+    }
+
+    const { data, error } = await dataQuery;
+
+    if (error) {
+      console.error("Error fetching quizzes:", error);
+      throw new Error(error.message || "Failed to fetch quizzes");
+    }
+
+    console.log("✅ Fetched quizzes:", data?.length, "quizzes");
+    console.log(
+      "Quiz titles:",
+      data?.map((q) => `"${q.title}" (published: ${q.published})`)
+    );
+
+    return {
+      data: data || [],
+      total: count || 0,
+    };
+  } catch (error) {
+    console.error("Error in getQuizzes:", error);
+    return { data: [], total: 0 };
+  }
+};
+
+// Get user's own quizzes (admin only)
+export const getUserQuizzes = async (
+  userId: string,
+  page = 1,
+  pageSize = 9,
+  searchTerm: string
+): Promise<{ data: Quiz[]; total: number }> => {
+  // Calculate the range for pagination
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  try {
+    // First get the total count
+    const { count, error: countError } = await supabase
+      .from("quizzes")
+      .select("*", { count: "exact", head: true })
+      .eq("author_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (countError) {
+      console.error("Error counting user quizzes:", countError);
       throw countError;
     }
 
@@ -31,18 +89,18 @@ export const getQuizzes = async (
     let dataQuery = supabase
       .from("quizzes")
       .select("*")
+      .eq("author_id", userId)
       .order("created_at", { ascending: false })
       .range(from, to);
+
     if (searchTerm) {
       dataQuery = dataQuery.ilike("title", `%${searchTerm}%`);
     }
 
-    // If it's a public route, only show published quizzes
-
     const { data, error } = await dataQuery;
 
     if (error) {
-      console.error("Error fetching quizzes:", error);
+      console.error("Error fetching user quizzes:", error);
       throw error;
     }
 
@@ -51,7 +109,7 @@ export const getQuizzes = async (
       total: count || 0,
     };
   } catch (error) {
-    console.error("Error in getQuizzes:", error);
+    console.error("Error in getUserQuizzes:", error);
     return { data: [], total: 0 };
   }
 };
@@ -79,26 +137,32 @@ export const getQuizById = async (id: string): Promise<Quiz | null> => {
 
 // Create a new quiz
 export const createQuiz = async (
-  quiz: Omit<Quiz, "id" | "created_at" | "updated_at">
+  quiz: Omit<Quiz, "created_at" | "updated_at">
 ): Promise<Quiz> => {
-  const { data, error } = await supabase
+  const createdAt = new Date().toISOString();
+  const payload = {
+    ...quiz,
+    created_at: createdAt,
+    updated_at: createdAt,
+  };
+
+  const insertStart = performance.now();
+  const { error } = await supabase
     .from("quizzes")
-    .insert([
-      {
-        ...quiz,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-    ])
-    .select()
-    .single();
+    .insert([payload], { returning: "minimal" });
 
   if (error) {
     console.error("Error creating quiz:", error);
     throw error;
   }
 
-  return data;
+  console.log(
+    "Quiz insert completed in",
+    `${(performance.now() - insertStart).toFixed(0)}ms`
+  );
+
+  // Return the payload (we already know the id because we set it client-side)
+  return payload;
 };
 
 // Update an existing quiz
